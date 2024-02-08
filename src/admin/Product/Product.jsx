@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ViewComponent from "../../components/ViewComponent/ViewComponent";
 import InputField from "../../components/Forms/InputField/InputField";
+import { EditProduct, addProducts, deleteProduct, fetchProducts } from "../../api/admin";
+import { errorToast } from "../../components/Toast";
+import axios from "axios";
 
 
 function Product() {
   const [formFiled, setFormField] = useState({});
+  const [refresh, setRefresh] = useState(false);
+  const [isEdit, setIsEdit] = useState({status:false,id:null});
+  const [isEditFormData, setIsEditFormData] = useState({name:null,details:null,price:null});
+  const [products,setProducts] = useState([])
 
   const formdatas = [
     {
@@ -29,18 +36,26 @@ function Product() {
       type: "text",
       placeholder: "Desciption",
       className: "",
-      name: "desciption",
+      name: "details",
     },
   ];
 
   const onChangeValues = (e) => {
-    console.log(e.target.value);
     setFormField({ ...formFiled, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    console.log(formFiled);
+
+    // callapi for add product
+    const response = await addProducts(formFiled)
+
+    console.log(response,'response');
+
+    setRefresh(!refresh)
+
+
+    console.log(formFiled,'from');
   };
 
   const headings = {
@@ -54,59 +69,147 @@ function Product() {
     console.log("object");
   };
 
-  const handleClickEdit = (e) => {
-    console.log("object");
-    console.log(e, "ee");
+  console.log(products,'products');
+  const onclickEdit = (e) => {
+    console.log(e,'ee');
+    setIsEdit({status:true,id:e})
+
+    // return true
+
+    const editData =  products.find((item)=>{
+      console.log(item._id,'item');
+      console.log(e,'edit');
+      if(item._id === e ){
+        return true
+      }else{
+        return null
+      }
+    })
+
+    console.log(editData,'editdata');
+    setIsEditFormData(editData)
+
+    // setRefresh(!refresh)
   };
 
-  const handleClickDelete = (e) => {
-    console.log("object");
-    console.log(e, "ee");
+  console.log(isEditFormData,"kkk");
+  const onclickDelete =async (e) => {
+    await axios.delete(`http://localhost:3000/api/products/${e}`)
+    setRefresh(!refresh)
   };
-const products = [
-    {
-      _id: 1,
-      title: "Iphone",
-      imageLink:
-        "https://image01-in.oneplus.net/india-oneplus-statics-file/epb/202310/04/C19Q9iaIejfz0zV9.png?x-amz-process=image/format,webp/quality,Q_80",
-      price: 20000,
-      onclickView: handleClickView,
-      onclickEdit: handleClickEdit,
-      onclickDelete: handleClickDelete,
-    },
-    {
-      _id: 2,
-      title: "samsung",
-      price: 15000,
-      imageLink:
-        "https://image01-in.oneplus.net/india-oneplus-statics-file/epb/202310/04/W10i8FYOGX31ih1D.png?x-amz-process=image/format,webp/quality,Q_80",
-      onclickView: handleClickView,
-      onclickEdit: handleClickEdit,
-      onclickDelete: handleClickDelete,
-    },
-    {
-      _id: 3,
-      title: "ipad",
-      imageLink: "https://m.media-amazon.com/images/I/51ZNhxm+jfS._SY450_.jpg",
-      price: 18000,
-      onclickView: handleClickView,
-      onclickEdit: handleClickEdit,
-      onclickDelete: handleClickDelete,
-    },
-  ];
+
+
+  useEffect(()=>{
+    fetchData()
+
+
+  },[refresh])
+  
+  const fetchData = async()=>{
+    try {
+      
+      const response = await fetchProducts()
+      console.log(response.data.products,'response');
+
+      setProducts(response.data.products)
+    } catch (error) {
+      errorToast(error.message)
+    }
+
+  }
+
+  const handleEdit = async(e)=>{
+    console.log(e,'ee')
+    e.preventDefault();
+
+    await axios.put(`http://localhost:3000/api/products/${isEdit.id}`,isEditFormData)
+    setRefresh(!refresh)
+  }
+
+  const handleEditChange = (e)=>{
+    setIsEditFormData({[e.target.name]:e.target.value})
+  }
+
+
 return (
     <div>
       <div>
         <h1 className="text-white">Product</h1>
-        <ViewComponent datas={products} headings={headings} />
+        <table className=" w-[80%] m-auto">
+        <tr className="">
+          <th className="text-white">NAME</th>
+          <th className="text-white">DETAILS</th>
+          <th className="text-white">PRICE</th>
+          <th className="text-white"></th>
+          <th className="text-white"></th>
+        </tr>
+        
+        {products.map(
+          (
+            {
+              name,
+              details,
+              price,
+              _id,
+            },
+            index
+          ) => {
+            return (
+              <tr key={index} className="text-center">
+
+                <td className="text-white">{name}</td>
+                <td className="text-white">{details}</td>
+                <td className="text-white">{price}</td>
+                <td className="text-green-600" onClick={() => onclickEdit(_id)}>
+                  Edit
+                </td>
+                <td className="text-red-500" onClick={() => onclickDelete(_id)}>
+                  Remove
+                </td>
+              </tr>
+            );
+          }
+        )}
+      </table>
       </div>
       <div className="flex justify-center items-center flex-col h-screen">
-        <form
+
+        {
+
+          isEdit.status  ?
+
+          <>
+
+
+          <form action="" onSubmit={handleEdit} 
+          className="w-[50%] rounded-md h-[500px] flex justify-center flex-col gap-5 items-center pb-[40%]"
+          
+          >
+            <div className=" text-xl">
+            <h1>Edit Product</h1>
+            
+
+              <input type="text" placeholder="name" name="name" onChange={handleEditChange}  value={isEditFormData?.name}/>
+              <input type="text" placeholder="price" name="price" onChange={handleEditChange}  value={isEditFormData?.price} />
+              <input type="text" placeholder="details" name="details" onChange={handleEditChange} value={isEditFormData?.details} />
+              <input type="submit" className="bg-slate-600 text-white"/>
+            </div>
+          </form>
+
+         </>
+          :
+
+          <>
+          
+          <form
           onSubmit={handleSubmit}
           action=""
           className="w-[50%] rounded-md h-[500px] flex justify-center flex-col gap-5 items-center pb-[40%]"
         >
-          <h2 className="text-white text-xl">Edit Product</h2>
+          <h2 className="text-white text-xl">Add Product</h2>
+          {
+
+          }
           {formdatas.map(({ className, placeholder, type, name }, index) => (
             <InputField
               onChange={onChangeValues}
@@ -122,6 +225,10 @@ return (
             className="text-white border-solid border-2 border-indigo-600 w-[4  0%]"
           />
         </form>
+          
+          </>
+
+        }
       </div>
     </div>
   );

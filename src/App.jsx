@@ -6,7 +6,7 @@ import Product from "./admin/Product/Product";
 import Cart from "./admin/Cart/Cart";
 import Orders from "./admin/Orders/Orders";
 import Payment from "./admin/Payment/Payment";
-import Home from "./admin/Home/Home";
+import Home from "./user/Home/Home";
 import User from "./user/User";
 import Protected from "./admin/Protected/Protected";
 
@@ -15,7 +15,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <>home</>,
+      element: <Home/>,
     },
     {
       path: "/admin",
@@ -47,6 +47,7 @@ function App() {
         },
       ],
     },
+   
 
     {
       path: "admin-register",
