@@ -1,12 +1,11 @@
+import React from "react";
 
-function User() {
-    return (
-      <div>
-        <h1 className="text-white">User</h1>
+export default function User(){
+    return(
+        <>
+
+        <div>user</div>
         
-      </div>
-      
+        </>
     )
-  }
-  
-  export default User
+}

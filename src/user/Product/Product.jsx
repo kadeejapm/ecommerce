@@ -3,7 +3,6 @@ import ViewComponent from "../../components/ViewComponent/ViewComponent";
 import InputField from "../../components/Forms/InputField/InputField";
 import { EditProduct, addProducts, deleteProduct, fetchProducts } from "../../api/admin";
 import { errorToast } from "../../components/Toast";
-import {Avatar} from "@mui/material"
 import axios from "axios";
 
 
@@ -13,8 +12,6 @@ function Product() {
   const [isEdit, setIsEdit] = useState({status:false,id:null});
   const [isEditFormData, setIsEditFormData] = useState({name:null,details:null,price:null});
   const [products,setProducts] = useState([])
-  const [imagePreview,setImagePreview] = useState()
-  const [Image,setImage] = useState()
 
   const formdatas = [
     {
@@ -51,21 +48,7 @@ function Product() {
     e.preventDefault();
 
     // callapi for add product
-
-    console.log(formFiled);
-
-    // return true
-    const formdata = new FormData()
-
-    formdata.append("name",formFiled.name)
-    formdata.append("price",formFiled.price)
-    formdata.append("details",formFiled.details)
-    formdata.append("profile",Image)
-
-
-
-    
-    const response = await addProducts(formdata)
+    const response = await addProducts(formFiled)
 
     console.log(response,'response');
 
@@ -109,7 +92,6 @@ function Product() {
     // setRefresh(!refresh)
   };
 
-  console.log(imagePreview,'imagePreview');
   console.log(isEditFormData,"kkk");
   const onclickDelete =async (e) => {
     await axios.delete(`http://localhost:3000/api/products/${e}`)
@@ -148,24 +130,11 @@ function Product() {
     setIsEditFormData({[e.target.name]:e.target.value})
   }
 
-  const handleChangeImage =(e)=>{
-    console.log('sss');
-    console.log(e.target.files[0],'ee');
-    setImage(e.target.files[0])
-    setImagePreview(URL.createObjectURL(e.target.files[0]))
-
-
-  }
-
 
 return (
     <div>
-      <Avatar alt="Remy Sharp" src={imagePreview} style={{width:"100px",height:"100px"}}/>
-      <input type="file" name="" onChange={handleChangeImage} id="" accept="image/*" />
-      <button onclick={handleSubmit} variant="container" style={{width:"200px",height:"5px"}}>submit</button>
-      <div> 
-        {/* {JSON.stringify(imagePreview)} */}
-        <h1 className="text-white">Product</h1>
+      <div>
+        {/* <h1 className="text-white">Product</h1> */}
         <table className=" w-[80%] m-auto">
         <tr className="">
           <th className="text-white">NAME</th>
@@ -182,7 +151,7 @@ return (
               details,
               price,
               _id,
-              profile,
+           
             },
             index
           ) => {
@@ -193,7 +162,6 @@ return (
                 <td className="text-white">{details}</td>
                 <td className="text-white">{price}</td>
 
-                <img style={{width:"80px",height:"80px",borderRadius:"50%"}} src={`http://localhost:3000/${profile}`}></img>
                 <td className="text-green-600" onClick={() => onclickEdit(_id)}>
                   Edit
                 </td>

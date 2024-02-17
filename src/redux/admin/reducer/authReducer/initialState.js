@@ -1,5 +1,5 @@
 export const initialState = {
-    isLogged:false,
-    token:null,
-    userDetails:{}
+  isLogged:localStorage.getItem("token"),
+  token:localStorage.getItem("islogged"),
+  userDetails:JSON.parse(localStorage.getItem("userDetails"))
 }
